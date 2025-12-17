@@ -1,0 +1,47 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: xiaozhi-gateway
+  profiles:
+    active: local
+  codec:
+    max-in-memory-size: 10MB # 调整缓冲区大小https://gitee.com/zhijiantianya/yudao-cloud/pulls/176
+
+  # Jackson 配置项
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true # 设置 LocalDateTime 的格式，使用时间戳
+      write-date-timestamps-as-nanoseconds: false # 设置不使用 nanoseconds 的格式。例如说 1611460870.401，而是直接 1611460870401
+      write-durations-as-timestamps: true # 设置 Duration 的格式，使用时间戳
+      fail-on-empty-beans: false # 允许序列化无属性的 Bean
+
+  main:
+    allow-circular-references: true # 允许循环依赖，因为项目是三层架构，无法避免这个情况。
+
+  config:
+    import:
+      - optional:classpath:application-${spring.profiles.active}.yaml # 加载【本地】配置
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yaml # 加载【Nacos】的配置
+
+  cloud:
+    gateway:
+      routes:
+        # 认证中心
+        - id: xiaozhi-auth
+          uri: lb://xiaozhi-auth
+          predicates:
+            - Path=/xiaozhi-auth/**
+          filters:
+            # 验证码处理
+            #- ImageCodeFilter
+            - StripPrefix=1
+        ## id只要唯一即可，名称任意
+        - id: xiaozhi-service
+          uri: http://localhost:8002/
+          predicates:
+            ## Path Route Predicate Factory断言
+            - Path=/xiaozhi-service/**
+          filters:
+            - StripPrefix=1
