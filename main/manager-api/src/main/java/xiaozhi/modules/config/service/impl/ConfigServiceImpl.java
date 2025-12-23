@@ -59,11 +59,13 @@ public class ConfigServiceImpl implements ConfigService {
     private final VoiceCloneService cloneVoiceService;
     private final AgentVoicePrintDao agentVoicePrintDao;
 
+    private static final String DEFAULT_CONFIG_KEY = "default";
+
     @Override
     public Object getConfig(Boolean isCache) {
         if (isCache) {
             // 先从Redis获取配置
-            Object cachedConfig = redisUtils.get(RedisKeys.getServerConfigKey());
+            Object cachedConfig = redisUtils.get(RedisKeys.getServerConfigKey(DEFAULT_CONFIG_KEY));
             if (cachedConfig != null) {
                 return cachedConfig;
             }
@@ -99,7 +101,7 @@ public class ConfigServiceImpl implements ConfigService {
                 isCache);
 
         // 将配置存入Redis
-        redisUtils.set(RedisKeys.getServerConfigKey(), result);
+        redisUtils.set(RedisKeys.getServerConfigKey(DEFAULT_CONFIG_KEY), result);
 
         return result;
     }
@@ -210,6 +212,8 @@ public class ConfigServiceImpl implements ConfigService {
                 result,
                 true);
 
+        // 将配置存入Redis
+        redisUtils.set(RedisKeys.getServerConfigKey(macAddress), result);
         return result;
     }
 
@@ -408,12 +412,15 @@ public class ConfigServiceImpl implements ConfigService {
                 typeConfig.put(model.getId(), model.getConfigJson());
                 // 如果是TTS类型，添加private_voice属性
                 if ("TTS".equals(modelTypes[i])) {
-                    if (voice != null)
+                    if (voice != null) {
                         ((Map<String, Object>) model.getConfigJson()).put("private_voice", voice);
-                    if (referenceAudio != null)
+                    }
+                    if (referenceAudio != null) {
                         ((Map<String, Object>) model.getConfigJson()).put("ref_audio", referenceAudio);
-                    if (referenceText != null)
+                    }
+                    if (referenceText != null) {
                         ((Map<String, Object>) model.getConfigJson()).put("ref_text", referenceText);
+                    }
 
                     // 火山引擎声音克隆需要替换resource_id
                     Map<String, Object> map = (Map<String, Object>) model.getConfigJson();

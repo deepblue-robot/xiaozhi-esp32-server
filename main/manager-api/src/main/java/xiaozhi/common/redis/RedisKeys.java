@@ -72,8 +72,8 @@ public class RedisKeys {
     /**
      * 获取系统配置缓存key
      */
-    public static String getServerConfigKey() {
-        return "server:config";
+    public static String getServerConfigKey(String deviceId) {
+        return "server:config:"+deviceId;
     }
 
     /**

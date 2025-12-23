@@ -29,6 +29,7 @@ public class AgentTemplateServiceImpl extends ServiceImpl<AgentTemplateDao, Agen
      * 
      * @return 默认模板实体
      */
+    @Override
     public AgentTemplateEntity getDefaultTemplate() {
         LambdaQueryWrapper<AgentTemplateEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.orderByAsc(AgentTemplateEntity::getSort)
