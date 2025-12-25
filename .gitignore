@@ -146,7 +146,7 @@ tmp
 .history
 .DS_Store
 main/xiaozhi-server/data
-
+main/xiaozhi-server/nacos-data
 main/manager-web/node_modules
 .config.yaml
 .secrets.yaml
