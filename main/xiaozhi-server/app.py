@@ -3,13 +3,15 @@ import uuid
 import signal
 import asyncio
 from aioconsole import ainput
-from config.settings import load_config
+from core.utils.cache.config import CacheType
+from config.config_loader import load_config_nacos
 from config.logger import setup_logging
 from core.utils.util import get_local_ip, validate_mcp_endpoint
 from core.http_server import SimpleHttpServer
 from core.websocket_server import WebSocketServer
 from core.utils.util import check_ffmpeg_installed
 from core.utils.gc_manager import get_gc_manager
+from core.utils.cache.redis_manager import GlobalCacheManager
 
 TAG = __name__
 logger = setup_logging()
@@ -44,9 +46,19 @@ async def monitor_stdin():
 
 
 async def main():
+    env = sys.argv[1] if len(sys.argv) > 1 else "dev"
     check_ffmpeg_installed()
-    config = load_config()
-
+    config, nacos_client = load_config_nacos(env)
+    cache_redis = GlobalCacheManager(
+        redis_config={
+            "host": config['redis'].get("host"),
+            "port": config['redis'].get("port"),
+            "db": config['redis'].get("db"),
+            # "password": "your_redis_password",z
+        }
+    )
+    # 测试
+    cache_redis.set(CacheType.CONFIG, "001", "hello redis")
     # auth_key优先级：配置文件server.auth_key > manager-api.secret > 自动生成
     # auth_key用于jwt认证，比如视觉分析接口的jwt认证、ota接口的token生成与websocket认证
     # 获取配置文件中的auth_key
@@ -121,6 +133,8 @@ async def main():
     logger.bind(tag=TAG).info(
         "=============================================================\n"
     )
+    # 注册到nacos中
+    nacos_client.register_and_observe()
 
     try:
         await wait_for_exit()  # 阻塞直到收到退出信号

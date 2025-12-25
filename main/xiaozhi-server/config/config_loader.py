@@ -1,9 +1,10 @@
+import asyncio
 import os
 import yaml
 from collections.abc import Mapping
 from config.manage_api_client import init_service, get_server_config, get_agent_models
-
-
+from config.nacos_client import XiaoZhiServer
+import concurrent.futures
 def get_project_dir():
     """获取项目根目录"""
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/"
@@ -53,6 +54,61 @@ def load_config():
     return config
 
 
+def load_config_nacos(env: str=None):
+    """加载配置文件"""
+    from core.utils.cache.manager import cache_manager, CacheType
+
+    # # 检查缓存
+    # cached_config = cache_manager.get(CacheType.CONFIG, "main_config")
+    # if cached_config is not None:
+    #     return cached_config, None
+
+    default_config_path = get_project_dir() + "config.yaml"
+    # custom_config_path = get_project_dir() + "data/.config.yaml"
+
+    # 加载默认配置
+    default_config = read_config(default_config_path)
+    # custom_config = read_config(custom_config_path)
+    nacos_config = default_config['nacos'].get(env)
+    server = XiaoZhiServer(
+        nacos_config.get("ip"),
+        nacos_config.get("port"),
+        nacos_config.get("username"),
+        nacos_config.get("password"),
+        nacos_config.get("namespace"),
+        nacos_config.get("group"),
+        nacos_config.get("data_id"),
+        nacos_config.get("service_name"))
+    custom_config = server.get_config()
+#     custom_config = {
+#   "redis": {
+#     "host": "10.16.32.3",
+#     "port": 6379,
+#     "db": 0
+#   },
+#   "manager-api": {
+#     "url": "http://127.0.0.1:8002/xiaozhi",
+#     "secret": "e0f49410-5fce-44a0-b2ca-40e54ea61461"
+#   },
+#   "prompt_template": "agent-base-prompt.txt"
+# }
+    custom_config = merge_configs(default_config, custom_config)
+    if custom_config.get("manager-api", {}).get("url"):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(
+                asyncio.run,
+                get_config_from_api_async(custom_config)
+            )
+            custom_config = future.result(timeout=30)
+
+    # 初始化目录
+    ensure_directories(custom_config)
+    # config['nacos_server'] = server
+    # 缓存配置
+    cache_manager.set(CacheType.CONFIG, "main_config", custom_config)
+    return custom_config, server
+
+
 async def get_config_from_api_async(config):
     """从Java API获取配置（异步版本）"""
     # 初始化API客户端
@@ -62,7 +118,7 @@ async def get_config_from_api_async(config):
     config_data = await get_server_config()
     if config_data is None:
         raise Exception("Failed to fetch server config from API")
-
+    config_data = merge_configs(config, config_data)
     config_data["read_config_from_api"] = True
     config_data["manager-api"] = {
         "url": config["manager-api"].get("url", ""),

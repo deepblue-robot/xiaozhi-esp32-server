@@ -306,12 +306,12 @@ class GlobalCacheManager:
         }
 
 
-# 全局实例
-cache_manager = GlobalCacheManager(
-    redis_config={
-        "host": "10.16.32.3",
-        "port": 6379,
-        "db": 0,
-        # "password": "your_redis_password",
-    }
-)
+# # 全局实例
+# cache_manager = GlobalCacheManager(
+#     redis_config={
+#         "host": "10.16.32.3",
+#         "port": 6379,
+#         "db": 0,
+#         # "password": "your_redis_password",
+#     }
+# )
