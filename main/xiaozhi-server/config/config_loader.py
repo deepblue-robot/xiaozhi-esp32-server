@@ -5,9 +5,8 @@ from collections.abc import Mapping
 from config.manage_api_client import init_service, get_server_config, get_agent_models
 from config.nacos_client import XiaoZhiServer
 import concurrent.futures
-def get_project_dir():
-    """获取项目根目录"""
-    return os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/"
+
+
 
 
 def read_config(config_path):
@@ -16,42 +15,9 @@ def read_config(config_path):
     return config
 
 
-def load_config():
-    """加载配置文件"""
-    from core.utils.cache.manager import cache_manager, CacheType
-
-    # 检查缓存
-    cached_config = cache_manager.get(CacheType.CONFIG, "main_config")
-    if cached_config is not None:
-        return cached_config
-
-    default_config_path = get_project_dir() + "config.yaml"
-    custom_config_path = get_project_dir() + "data/.config.yaml"
-
-    # 加载默认配置
-    default_config = read_config(default_config_path)
-    custom_config = read_config(custom_config_path)
-
-    if custom_config.get("manager-api", {}).get("url"):
-        import asyncio
-        try:
-            loop = asyncio.get_running_loop()
-            # 如果已经在事件循环中，使用异步版本
-            config = asyncio.run_coroutine_threadsafe(
-                get_config_from_api_async(custom_config), loop
-            ).result()
-        except RuntimeError:
-            # 如果不在事件循环中（启动时），创建新的事件循环
-            config = asyncio.run(get_config_from_api_async(custom_config))
-    else:
-        # 合并配置
-        config = merge_configs(default_config, custom_config)
-    # 初始化目录
-    ensure_directories(config)
-
-    # 缓存配置
-    cache_manager.set(CacheType.CONFIG, "main_config", config)
-    return config
+def get_project_dir():
+    """获取项目根目录"""
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/"
 
 
 def load_config_nacos(env: str=None):
@@ -63,7 +29,7 @@ def load_config_nacos(env: str=None):
     # if cached_config is not None:
     #     return cached_config, None
 
-    default_config_path = get_project_dir() + "config.yaml"
+    default_config_path = get_project_dir() + f"data/.config-{env}.yaml"
     # custom_config_path = get_project_dir() + "data/.config.yaml"
 
     # 加载默认配置

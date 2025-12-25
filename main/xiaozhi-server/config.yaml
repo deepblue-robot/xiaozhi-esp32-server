@@ -1013,31 +1013,3 @@ TTS:
     # volume: 50  # 音量：0-100
     # speed: 50  # 语速：0-100
     # pitch: 50  # 语调：0-100
-nacos:
-  dev:
-    ip: 10.16.33.68
-    port: 8848
-    username: nacos
-    password: deepblue2022
-    namespace: 0491f6be-08ea-4fab-bc14-e8269912f704
-    group: DEFAULT_GROUP
-    data_id: agent-config
-    service_name: xiaozhi-agent
-  test:
-    ip: 10.16.33.68
-    port: 8848
-    username:
-    password:
-    namespace: deepblue-agent-test
-    group: DEFAULT_GROUP
-    data_id: agent-config
-    service_name: deepblue-agent
-  prod:
-    ip: host.docker.internal
-    port: 8848
-    username:
-    password:
-    namespace: deepblue-agent-prod
-    group: DEFAULT_GROUP
-    data_id: agent-config
-    service_name: deepblue-agent

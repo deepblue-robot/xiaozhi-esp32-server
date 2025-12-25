@@ -6,7 +6,7 @@
 # 使用管理员，进入【参数管理】页面，找到【server.secret】，复制它到参数值，注意每次从零部署，server.secret都会变化
 # 打开本data目录下的.config.yaml文件，修改manager-api.secret为刚才复制出来的server.secret
 server:
-  ip: 0.0.0.0
+  ip: 10.16.32.3
   port: 8000
   # http服务的端口，用于视觉分析接口
   http_port: 8003
@@ -21,7 +21,30 @@ manager-api:
   # 你的manager-api的地址，最好使用局域网ip
   # 如果使用docker部署，请使用填写成 http://xiaozhi-esp32-server-web:8002/xiaozhi
   url: http://10.16.32.3:8002/xiaozhi
+  #url: http://192.168.23.78:8002/xiaozhi
   # 你的manager-api的token，就是刚才复制出来的server.secret
   secret: e0f49410-5fce-44a0-b2ca-40e54ea61461
-# 默认系统提示词模板文件
-prompt_template: agent-base-prompt.txt
+
+log:
+  # 设置控制台输出的日志格式，时间、日志级别、标签、消息
+  log_format: "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{extra[tag]}</cyan> | <level>{message}</level>"
+  # 设置日志文件输出的格式，时间、日志级别、标签、消息
+  log_format_file: "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {extra[tag]} | {message}"
+  # 设置日志等级：INFO、DEBUG
+  log_level: INFO
+  # 设置日志路径
+  log_dir: tmp
+  # 设置日志文件
+  log_file: "server.log"
+  # 设置数据文件路径
+  data_dir: data
+nacos:
+  dev:
+    ip: 10.16.33.68
+    port: 8848
+    username: nacos
+    password: deepblue2022
+    namespace: 0491f6be-08ea-4fab-bc14-e8269912f704
+    group: DEFAULT_GROUP
+    data_id: agent-config
+    service_name: xiaozhi-agent

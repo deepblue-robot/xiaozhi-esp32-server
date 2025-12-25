@@ -1,5 +1,6 @@
 import os
 import sys
+import yaml
 import multiprocessing
 from loguru import logger
 SERVER_VERSION = "0.8.10"
@@ -41,16 +42,20 @@ def formatter(record):
     record["selected_module"] = record["extra"]["selected_module"]
     return record["message"]
 
+def read_config(config_path):
+    with open(config_path, "r", encoding="utf-8") as file:
+        config = yaml.safe_load(file)
+    return config
+
+
+def get_project_dir():
+    """获取项目根目录"""
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/"
+
 
 
 def setup_logging(
-        log_level: str = "INFO",
-        log_dir: str = "logs",
-        log_file: str = "app.log",
-        rotation: str = "10 MB",
-        retention: str = "30 days",
-        log_format: str = None,
-        log_format_file: str = None,
+        env: str = "dev"
 ):
     """
     全局配置 loguru，只需调用一次
@@ -61,7 +66,23 @@ def setup_logging(
     if _initialized:
         return logger
 
+    default_config_path = get_project_dir() + f"data/.config-{env}.yaml"
+    default_config = read_config(default_config_path)
+    log_config = default_config['log']
 
+    log_format = log_config.get("log_format")
+    log_format_file = log_config.get("log_format_file")
+
+
+    log_level = log_config.get("log_level", "INFO")
+    log_dir = log_config.get("log_dir", "tmp")
+    log_file = log_config.get("log_file", "server.log")
+    data_dir = log_config.get("data_dir", "data")
+    rotation: str = "10 MB"
+    retention: str = "30 days"
+    # 创建日志目录
+    os.makedirs(log_dir, exist_ok=True)
+    os.makedirs(data_dir, exist_ok=True)
 
     # 创建日志目录
     os.makedirs(log_dir, exist_ok=True)

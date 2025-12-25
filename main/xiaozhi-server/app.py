@@ -49,9 +49,7 @@ async def main():
     check_ffmpeg_installed()
     # 全局配置（只调用一次）
     setup_logging(
-        log_level="DEBUG",
-        log_dir="logs",
-        log_file="server.log",
+        env = env
     )
     config, nacos_client = load_config_nacos(env)
     cache_redis = GlobalCacheManager(
