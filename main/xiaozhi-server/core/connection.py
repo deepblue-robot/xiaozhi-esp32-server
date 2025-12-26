@@ -36,15 +36,15 @@ from plugins_func.register import Action
 from core.auth import AuthenticationError
 from config.config_loader import get_private_config_from_api
 from core.providers.tts.dto.dto import ContentType, TTSMessageDTO, SentenceType
-from config.logger import setup_logging, build_module_string, create_connection_logger
+from config.logger import build_module_string, create_connection_logger
 from config.manage_api_client import DeviceNotFoundException, DeviceBindException
 from core.utils.prompt_manager import PromptManager
 from core.utils.voiceprint_provider import VoiceprintProvider
 from core.utils import textUtils
-
+from loguru import logger
 TAG = __name__
 
-auto_import_modules("plugins_func.functions")
+# auto_import_modules("plugins_func.functions")
 
 
 class TTSException(RuntimeError):
@@ -65,7 +65,7 @@ class ConnectionHandler:
         self.common_config = config
         self.config = copy.deepcopy(config)
         self.session_id = str(uuid.uuid4())
-        self.logger = setup_logging()
+        self.logger = logger
         self.server = server  # 保存server实例的引用
 
         self.need_bind = False  # 是否需要绑定设备

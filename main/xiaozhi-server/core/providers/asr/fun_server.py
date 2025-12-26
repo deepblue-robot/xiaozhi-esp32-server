@@ -4,13 +4,13 @@ from core.providers.asr.dto.dto import InterfaceType
 import ssl
 import json
 import websockets
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 import asyncio
 import re
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 
 class ASRProvider(ASRProviderBase):
     def __init__(self, config: dict, delete_audio_file: bool):

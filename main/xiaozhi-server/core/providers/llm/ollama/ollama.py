@@ -1,10 +1,10 @@
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from openai import OpenAI
 import json
 from core.providers.llm.base import LLMProviderBase
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class LLMProvider(LLMProviderBase):

@@ -1,4 +1,4 @@
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 from http import HTTPStatus
 import dashscope
 from dashscope import Application
@@ -7,8 +7,8 @@ from core.utils.util import check_model_key
 import time
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 
 class LLMProvider(LLMProviderBase):
     def __init__(self, config):

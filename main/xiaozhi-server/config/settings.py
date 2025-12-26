@@ -1,6 +1,6 @@
 import os
 from config.config_loader import read_config, get_project_dir, load_config
-
+import multiprocessing
 
 default_config_file = "config.yaml"
 config_file_valid = False
@@ -10,6 +10,14 @@ def check_config_file():
     global config_file_valid
     if config_file_valid:
         return
+
+    # ========== 调试信息 ==========
+    process_name = multiprocessing.current_process().name
+    print(f"[DEBUG] check_config_file called, process: {process_name}, config_file_valid: {config_file_valid}")
+    if multiprocessing.current_process().name != 'MainProcess':
+        config_file_valid = True  # 子进程直接跳过
+        return
+
     """
     简化的配置检查，仅提示用户配置文件的使用情况
     """

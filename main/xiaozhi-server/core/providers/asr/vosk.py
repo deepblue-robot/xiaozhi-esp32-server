@@ -3,13 +3,13 @@ import json
 import time
 from typing import Optional, Tuple, List
 from .base import ASRProviderBase
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 from core.providers.asr.dto.dto import InterfaceType
 import vosk
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 class ASRProvider(ASRProviderBase):
     def __init__(self, config: dict, delete_audio_file: bool = True):
         super().__init__()

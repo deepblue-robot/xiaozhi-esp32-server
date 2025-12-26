@@ -4,11 +4,11 @@ import json
 import asyncio
 import re
 import websockets
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from .mcp_endpoint_client import MCPEndpointClient
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 async def connect_mcp_endpoint(mcp_endpoint_url: str, conn=None) -> MCPEndpointClient:

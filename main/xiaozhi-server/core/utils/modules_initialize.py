@@ -1,9 +1,9 @@
 from typing import Dict, Any
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.utils import tts, llm, intent, memory, vad, asr
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 def initialize_modules(

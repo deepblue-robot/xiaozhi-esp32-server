@@ -1,11 +1,11 @@
 from plugins_func.register import register_function, ToolType, ActionResponse, Action
 from plugins_func.functions.hass_init import initialize_hass_handler
-from config.logger import setup_logging
+# from config.logger import setup_logging
 import asyncio
 import requests
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 hass_get_state_function_desc = {
     "type": "function",

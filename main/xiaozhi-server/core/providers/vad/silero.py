@@ -2,11 +2,11 @@ import time
 import numpy as np
 import torch
 import opuslib_next
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.providers.vad.base import VADProviderBase
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class VADProvider(VADProviderBase):

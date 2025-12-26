@@ -3,10 +3,10 @@
 import asyncio
 from concurrent.futures import Future
 from core.utils.util import sanitize_tool_name
-from config.logger import setup_logging
+# from config.logger import setup_logging
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class MCPClient:

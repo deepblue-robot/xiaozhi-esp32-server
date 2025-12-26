@@ -7,10 +7,10 @@ from typing_extensions import Annotated
 from typing import Literal
 from core.utils.util import check_model_key, parse_string_to_list
 from core.providers.tts.base import TTSProviderBase
-from config.logger import setup_logging
+# from config.logger import setup_logging
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class ServeReferenceAudio(BaseModel):

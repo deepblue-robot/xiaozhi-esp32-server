@@ -1,7 +1,6 @@
 """
 Redis 版全局缓存管理器（兼容原接口）
 """
-import time
 import pickle
 import json
 from typing import Any, Optional, Dict, Callable, List
@@ -10,7 +9,7 @@ import redis
 from redis.exceptions import RedisError
 
 from .config import CacheConfig, CacheType
-
+from loguru import logger
 
 
 
@@ -55,8 +54,9 @@ class GlobalCacheManager:
     def logger(self):
         """延迟初始化 logger 以避免循环导入"""
         if self._logger is None:
-            from config.logger import setup_logging
-            self._logger = setup_logging()
+            # from config.logger import setup_logging
+            # from loguru import logger
+            self._logger = logger
         return self._logger
 
     def _serialize(self, value: Any) -> bytes:

@@ -1,4 +1,4 @@
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 import json
 from core.providers.llm.base import LLMProviderBase
 
@@ -14,8 +14,8 @@ from core.providers.llm.system_prompt import get_system_prompt_for_function
 from core.utils.util import check_model_key
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 
 class LLMProvider(LLMProviderBase):
     def __init__(self, config):

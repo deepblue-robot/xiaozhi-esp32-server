@@ -1,10 +1,10 @@
 import requests
 from requests.exceptions import RequestException
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.providers.llm.base import LLMProviderBase
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class LLMProvider(LLMProviderBase):

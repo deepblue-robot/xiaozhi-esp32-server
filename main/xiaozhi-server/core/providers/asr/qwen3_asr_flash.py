@@ -2,13 +2,13 @@ import os
 import tempfile
 from typing import Optional, Tuple, List
 import dashscope
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 from core.providers.asr.base import ASRProviderBase
 from core.providers.asr.dto.dto import InterfaceType
 
 tag = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 
 class ASRProvider(ASRProviderBase):
     def __init__(self, config: dict, delete_audio_file: bool):

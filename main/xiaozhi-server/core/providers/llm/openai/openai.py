@@ -1,12 +1,12 @@
 import httpx
 import openai
 from openai.types import CompletionUsage
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.utils.util import check_model_key
 from core.providers.llm.base import LLMProviderBase
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class LLMProvider(LLMProviderBase):

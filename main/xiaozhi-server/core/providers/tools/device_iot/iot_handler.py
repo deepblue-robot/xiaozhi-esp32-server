@@ -1,11 +1,11 @@
 """IoT设备支持模块，提供IoT设备描述符和状态处理"""
 
 import asyncio
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from .iot_descriptor import IotDescriptor
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 async def handleIotDescriptors(conn, descriptors):

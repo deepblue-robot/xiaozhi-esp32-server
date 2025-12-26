@@ -6,10 +6,10 @@ import re
 from concurrent.futures import Future
 from core.utils.util import get_vision_url, sanitize_tool_name
 from core.utils.auth import AuthToken
-from config.logger import setup_logging
+# from config.logger import setup_logging
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class MCPClient:

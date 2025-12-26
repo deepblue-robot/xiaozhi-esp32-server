@@ -1,11 +1,11 @@
 import json
-from config.logger import setup_logging
+# from config.logger import setup_logging
 import requests
 from core.providers.llm.base import LLMProviderBase
 from core.utils.util import check_model_key
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class LLMProvider(LLMProviderBase):

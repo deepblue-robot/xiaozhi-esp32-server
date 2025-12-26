@@ -1,10 +1,10 @@
 import os
 import re
 import sys
-from config.logger import setup_logging
+# from config.logger import setup_logging
 import importlib
 
-logger = setup_logging()
+from loguru import logger
 
 punctuation_set = {
     "，",

@@ -1,11 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from plugins_func.register import register_function, ToolType, ActionResponse, Action
 from core.utils.util import get_ip_info
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 GET_WEATHER_FUNCTION_DESC = {
     "type": "function",

@@ -2,12 +2,12 @@ import os
 import json
 import uuid
 import requests
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from datetime import datetime
 from core.providers.tts.base import TTSProviderBase
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 class TTSProvider(TTSProviderBase):
     def __init__(self, config, delete_audio_file):

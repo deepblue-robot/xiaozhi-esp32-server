@@ -1,10 +1,10 @@
 from ..base import IntentProviderBase
 from typing import List, Dict
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 
 class IntentProvider(IntentProviderBase):
     async def detect_intent(self, conn, dialogue_history: List[Dict], text: str) -> str:

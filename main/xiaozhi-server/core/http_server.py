@@ -1,16 +1,16 @@
 import asyncio
 from aiohttp import web
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 from core.api.ota_handler import OTAHandler
 from core.api.vision_handler import VisionHandler
-
+from loguru import logger
 TAG = __name__
 
 
 class SimpleHttpServer:
     def __init__(self, config: dict):
         self.config = config
-        self.logger = setup_logging()
+        self.logger = logger
         self.ota_handler = OTAHandler(config)
         self.vision_handler = VisionHandler(config)
 

@@ -1,8 +1,8 @@
 from plugins_func.register import register_function, ToolType, ActionResponse, Action
-from config.logger import setup_logging
+# from config.logger import setup_logging
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 handle_exit_intent_function_desc = {
     "type": "function",

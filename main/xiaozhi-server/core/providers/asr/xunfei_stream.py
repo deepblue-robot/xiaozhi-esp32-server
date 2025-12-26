@@ -10,14 +10,14 @@ from time import mktime
 from datetime import datetime
 from urllib.parse import urlencode
 from typing import List
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 from wsgiref.handlers import format_date_time
 from core.providers.asr.base import ASRProviderBase
 from core.providers.asr.dto.dto import InterfaceType
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 # 帧状态常量
 STATUS_FIRST_FRAME = 0  # 第一帧的标识
 STATUS_CONTINUE_FRAME = 1  # 中间帧标识

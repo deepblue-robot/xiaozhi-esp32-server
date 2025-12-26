@@ -9,11 +9,11 @@ from typing import Optional, Tuple, List
 from core.providers.asr.dto.dto import InterfaceType
 import requests
 from core.providers.asr.base import ASRProviderBase
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 
 class ASRProvider(ASRProviderBase):
     API_URL = "https://asr.tencentcloudapi.com"

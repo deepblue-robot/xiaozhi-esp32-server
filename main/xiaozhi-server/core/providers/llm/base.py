@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 class LLMProviderBase(ABC):
     @abstractmethod
     def response(self, session_id, dialogue):

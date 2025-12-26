@@ -1,15 +1,15 @@
 from typing import List, Dict
 from ..base import IntentProviderBase
 from plugins_func.functions.play_music import initialize_music_handler
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 import re
 import json
 import hashlib
 import time
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 
 class IntentProvider(IntentProviderBase):
     def __init__(self, config):

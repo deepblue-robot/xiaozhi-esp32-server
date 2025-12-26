@@ -1,10 +1,9 @@
 import importlib
 import pkgutil
-from config.logger import setup_logging
+import multiprocessing
 
 TAG = __name__
 
-logger = setup_logging()
 
 def auto_import_modules(package_name):
     """
@@ -13,9 +12,14 @@ def auto_import_modules(package_name):
     Args:
         package_name (str): 包的名称，如 'functions'。
     """
+
+    # 子进程跳过配置（会继承主进程的配置）
+    if multiprocessing.current_process().name != 'MainProcess':
+        return
     # 获取包的路径
     package = importlib.import_module(package_name)
     package_path = package.__path__
+
 
     # 遍历包内的所有模块
     for _, module_name, _ in pkgutil.iter_modules(package_path):

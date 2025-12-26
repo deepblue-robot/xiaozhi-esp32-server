@@ -7,14 +7,14 @@ import asyncio
 import traceback
 import websockets
 from asyncio import Task
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.utils import opus_encoder_utils
 from core.utils.tts import MarkdownCleaner
 from core.providers.tts.base import TTSProviderBase
 from core.providers.tts.dto.dto import SentenceType, ContentType, InterfaceType
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class TTSProvider(TTSProviderBase):

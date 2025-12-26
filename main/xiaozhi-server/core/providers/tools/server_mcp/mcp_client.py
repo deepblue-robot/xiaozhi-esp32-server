@@ -17,9 +17,9 @@ from mcp.client.sse import sse_client
 from mcp.client.streamable_http import streamablehttp_client
 from mcp.shared.session import ProgressFnT
 
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.utils.util import sanitize_tool_name
-
+from loguru import logger
 TAG = __name__
 
 
@@ -32,7 +32,7 @@ class ServerMCPClient:
         Args:
             config: MCP服务配置字典
         """
-        self.logger = setup_logging()
+        self.logger = logger
         self.config = config
 
         self._worker_task: Optional[asyncio.Task] = None

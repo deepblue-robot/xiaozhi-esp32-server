@@ -6,15 +6,15 @@ import shutil
 import psutil
 import asyncio
 
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 from typing import Optional, Tuple, List
 from funasr import AutoModel
 from funasr.utils.postprocess_utils import rich_transcription_postprocess
 from core.providers.asr.base import ASRProviderBase
 from core.providers.asr.dto.dto import InterfaceType
-
+from loguru import logger
 TAG = __name__
-logger = setup_logging()
+# from loguru import logger
 
 MAX_RETRIES = 2
 RETRY_DELAY = 1  # 重试延迟（秒）

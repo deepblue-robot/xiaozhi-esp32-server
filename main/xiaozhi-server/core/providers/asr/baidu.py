@@ -3,11 +3,11 @@ import os
 from typing import Optional, Tuple, List
 from aip import AipSpeech
 from core.providers.asr.base import ASRProviderBase
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 from core.providers.asr.dto.dto import InterfaceType
-
+from loguru import logger
 TAG = __name__
-logger = setup_logging()
+# from loguru import logger
 
 
 class ASRProvider(ASRProviderBase):

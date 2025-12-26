@@ -11,7 +11,7 @@ from datetime import datetime
 from core.utils import textUtils
 from typing import Callable, Any
 from abc import ABC, abstractmethod
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.utils.tts import MarkdownCleaner
 from core.utils.output_counter import add_device_output
 from core.handle.reportHandle import enqueue_tts_report
@@ -25,7 +25,7 @@ from core.providers.tts.dto.dto import (
 )
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class TTSProviderBase(ABC):

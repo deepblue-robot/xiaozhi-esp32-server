@@ -3,7 +3,7 @@ import wave
 import os
 import sys
 import io
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 from typing import Optional, Tuple, List
 from core.providers.asr.dto.dto import InterfaceType
 from core.providers.asr.base import ASRProviderBase
@@ -14,8 +14,8 @@ import sherpa_onnx
 from modelscope.hub.file_download import model_file_download
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 
 # 捕获标准输出
 class CaptureOutput:

@@ -5,11 +5,12 @@ import asyncio
 import websockets
 import opuslib_next
 from core.providers.asr.base import ASRProviderBase
-from config.logger import setup_logging
+# # from config.logger import setup_logging
+from loguru import logger
 from core.providers.asr.dto.dto import InterfaceType
 
 TAG = __name__
-logger = setup_logging()
+# from loguru import logger
 
 
 class ASRProvider(ASRProviderBase):

@@ -6,7 +6,7 @@ import asyncio
 import aiohttp
 import requests
 import traceback
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.utils.tts import MarkdownCleaner
 from core.utils.util import parse_string_to_list
 from core.providers.tts.base import TTSProviderBase
@@ -14,7 +14,7 @@ from core.utils import opus_encoder_utils, textUtils
 from core.providers.tts.dto.dto import SentenceType, ContentType
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class TTSProvider(TTSProviderBase):

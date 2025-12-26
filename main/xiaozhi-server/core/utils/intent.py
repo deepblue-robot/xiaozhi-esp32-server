@@ -1,9 +1,9 @@
 import os
 import sys
-from config.logger import setup_logging
+# from config.logger import setup_logging
 import importlib
 
-logger = setup_logging()
+from loguru import logger
 
 
 def create_instance(class_name, *args, **kwargs):

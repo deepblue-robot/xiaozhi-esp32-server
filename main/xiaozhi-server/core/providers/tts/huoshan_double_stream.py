@@ -7,7 +7,7 @@ import traceback
 from typing import Callable, Any
 import websockets
 from core.utils.tts import MarkdownCleaner
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.utils import opus_encoder_utils
 from core.utils.util import check_model_key
 from core.providers.tts.base import TTSProviderBase
@@ -16,7 +16,7 @@ from asyncio import Task
 
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 PROTOCOL_VERSION = 0b0001
 DEFAULT_HEADER_SIZE = 0b0001

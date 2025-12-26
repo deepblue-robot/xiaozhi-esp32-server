@@ -6,10 +6,10 @@
 import gc
 import asyncio
 import threading
-from config.logger import setup_logging
+# from config.logger import setup_logging
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class GlobalGCManager:

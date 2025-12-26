@@ -12,9 +12,8 @@ from core.websocket_server import WebSocketServer
 from core.utils.util import check_ffmpeg_installed
 from core.utils.gc_manager import get_gc_manager
 from core.utils.cache.redis_manager import GlobalCacheManager
-
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 async def wait_for_exit() -> None:
@@ -48,6 +47,12 @@ async def monitor_stdin():
 async def main():
     env = sys.argv[1] if len(sys.argv) > 1 else "dev"
     check_ffmpeg_installed()
+    # 全局配置（只调用一次）
+    setup_logging(
+        log_level="DEBUG",
+        log_dir="logs",
+        log_file="server.log",
+    )
     config, nacos_client = load_config_nacos(env)
     cache_redis = GlobalCacheManager(
         redis_config={

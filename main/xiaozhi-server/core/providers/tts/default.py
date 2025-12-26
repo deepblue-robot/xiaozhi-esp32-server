@@ -1,9 +1,9 @@
 import os
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.providers.tts.base import TTSProviderBase
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class DefaultTTS(TTSProviderBase):

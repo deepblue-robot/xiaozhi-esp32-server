@@ -1,7 +1,8 @@
 import json
 import copy
 from aiohttp import web
-from config.logger import setup_logging
+# # from config.logger import setup_logging
+from loguru import logger
 from core.utils.util import get_vision_url, is_valid_image_file
 from core.utils.vllm import create_instance
 from config.config_loader import get_private_config_from_api
@@ -19,7 +20,7 @@ MAX_FILE_SIZE = 5 * 1024 * 1024
 class VisionHandler:
     def __init__(self, config: dict):
         self.config = config
-        self.logger = setup_logging()
+        self.logger = logger
         # 初始化认证工具
         self.auth = AuthToken(config["server"]["auth_key"])
 

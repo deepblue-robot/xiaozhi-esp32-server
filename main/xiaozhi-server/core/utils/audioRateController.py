@@ -1,9 +1,9 @@
 import time
 import asyncio
-from config.logger import setup_logging
+# from config.logger import setup_logging
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class AudioRateController:

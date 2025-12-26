@@ -12,11 +12,11 @@ from mcp.shared.session import ProgressFnT
 from mcp.types import LoggingMessageNotificationParams
 
 from config.config_loader import get_project_dir
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from .mcp_client import ServerMCPClient
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class ServerMCPManager:

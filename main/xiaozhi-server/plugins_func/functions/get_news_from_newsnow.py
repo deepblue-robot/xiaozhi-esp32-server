@@ -1,12 +1,12 @@
 import random
 import requests
 import json
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from plugins_func.register import register_function, ToolType, ActionResponse, Action
 from markitdown import MarkItDown
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 CHANNEL_MAP = {
     "V2EX": "v2ex-share",

@@ -11,13 +11,13 @@ import requests
 from urllib import parse
 import time
 from datetime import datetime
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 from core.providers.asr.base import ASRProviderBase
 from core.providers.asr.dto.dto import InterfaceType
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 
 class AccessToken:
     @staticmethod

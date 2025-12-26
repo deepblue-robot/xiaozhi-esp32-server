@@ -2,7 +2,7 @@
 
 import json
 from typing import Dict, List, Any, Optional
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from plugins_func.loadplugins import auto_import_modules
 
 from .base import ToolType
@@ -13,7 +13,7 @@ from .server_mcp import ServerMCPExecutor
 from .device_iot import DeviceIoTExecutor
 from .device_mcp import DeviceMCPExecutor
 from .mcp_endpoint import MCPEndpointExecutor
-
+from loguru import logger
 
 class UnifiedToolHandler:
     """统一工具处理器"""
@@ -21,7 +21,7 @@ class UnifiedToolHandler:
     def __init__(self, conn):
         self.conn = conn
         self.config = conn.config
-        self.logger = setup_logging()
+        self.logger = logger
 
         # 创建工具管理器
         self.tool_manager = ToolManager(conn)

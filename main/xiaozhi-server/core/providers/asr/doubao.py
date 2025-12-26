@@ -4,14 +4,14 @@ import uuid
 import json
 import gzip
 import websockets
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 from typing import Optional, Tuple, List
 from core.providers.asr.base import ASRProviderBase
 from core.providers.asr.dto.dto import InterfaceType
-
+from loguru import logger
 
 TAG = __name__
-logger = setup_logging()
+# from loguru import logger
 
 CLIENT_FULL_REQUEST = 0b0001
 CLIENT_AUDIO_ONLY_REQUEST = 0b0010

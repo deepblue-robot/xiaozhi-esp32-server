@@ -8,7 +8,7 @@ from google.generativeai import types, GenerationConfig
 
 from core.providers.llm.base import LLMProviderBase
 from core.utils.util import check_model_key
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from google.generativeai.types import GenerateContentResponse
 from requests import RequestException
 

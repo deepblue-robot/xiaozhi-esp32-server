@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 
 class IntentProviderBase(ABC):
     def __init__(self, config):

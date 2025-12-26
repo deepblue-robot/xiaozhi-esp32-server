@@ -1,10 +1,10 @@
 import requests
 import sys
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from plugins_func.register import register_function, ToolType, ActionResponse, Action
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 # 定义基础的函数描述模板
 SEARCH_FROM_RAGFLOW_FUNCTION_DESC = {

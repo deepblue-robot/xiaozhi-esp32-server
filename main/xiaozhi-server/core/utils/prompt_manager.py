@@ -5,7 +5,7 @@
 
 import os
 from typing import Dict, Any
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from jinja2 import Template
 
 TAG = __name__

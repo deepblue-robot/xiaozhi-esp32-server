@@ -2,11 +2,11 @@ import random
 import requests
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from plugins_func.register import register_function, ToolType, ActionResponse, Action
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 GET_NEWS_FROM_CHINANEWS_FUNCTION_DESC = {
     "type": "function",

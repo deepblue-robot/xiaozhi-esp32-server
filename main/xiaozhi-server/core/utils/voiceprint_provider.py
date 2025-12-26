@@ -4,12 +4,12 @@ import aiohttp
 import requests
 from urllib.parse import urlparse, parse_qs
 from typing import Optional, Dict
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.utils.cache.manager import cache_manager
 from core.utils.cache.config import CacheType
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class VoiceprintProvider:

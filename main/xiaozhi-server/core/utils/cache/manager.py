@@ -8,7 +8,7 @@ from typing import Any, Optional, Dict
 from collections import OrderedDict
 from .strategies import CacheStrategy, CacheEntry
 from .config import CacheConfig, CacheType
-
+from loguru import logger
 
 class GlobalCacheManager:
     """全局缓存管理器"""
@@ -26,9 +26,9 @@ class GlobalCacheManager:
     def logger(self):
         """延迟初始化 logger 以避免循环导入"""
         if self._logger is None:
-            from config.logger import setup_logging
+            # from config.logger import setup_logging
 
-            self._logger = setup_logging()
+            self.logger = logger
         return self._logger
 
     def _get_cache_name(self, cache_type: CacheType, namespace: str = "") -> str:

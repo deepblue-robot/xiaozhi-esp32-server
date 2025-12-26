@@ -1,6 +1,6 @@
 import httpx
 from typing import Dict, Any, List
-from config.logger import setup_logging
+# from config.logger import setup_logging
 
 TAG = __name__
 

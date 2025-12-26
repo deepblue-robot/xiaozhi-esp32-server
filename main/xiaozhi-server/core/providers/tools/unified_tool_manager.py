@@ -1,17 +1,17 @@
 """统一工具管理器"""
 
 from typing import Dict, List, Optional, Any
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from plugins_func.register import Action, ActionResponse
 from .base import ToolType, ToolDefinition, ToolExecutor
-
+from loguru import logger
 
 class ToolManager:
     """统一工具管理器，管理所有类型的工具"""
 
     def __init__(self, conn):
         self.conn = conn
-        self.logger = setup_logging()
+        self.logger = logger
         self.executors: Dict[ToolType, ToolExecutor] = {}
         self._cached_tools: Optional[Dict[str, ToolDefinition]] = None
         self._cached_function_descriptions: Optional[List[Dict[str, Any]]] = None

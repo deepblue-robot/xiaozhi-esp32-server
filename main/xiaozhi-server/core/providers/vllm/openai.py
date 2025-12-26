@@ -1,11 +1,11 @@
 import openai
 import json
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.utils.util import check_model_key
 from core.providers.vllm.base import VLLMProviderBase
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class VLLMProvider(VLLMProviderBase):

@@ -1,6 +1,6 @@
 import time
 import os
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 from typing import Optional, Tuple, List
 from core.providers.asr.dto.dto import InterfaceType
 from core.providers.asr.base import ASRProviderBase
@@ -8,8 +8,8 @@ from core.providers.asr.base import ASRProviderBase
 import requests
 
 TAG = __name__
-logger = setup_logging()
-
+# from loguru import logger
+from loguru import logger
 class ASRProvider(ASRProviderBase):
     def __init__(self, config: dict, delete_audio_file: bool):
         self.interface_type = InterfaceType.NON_STREAM

@@ -2,8 +2,8 @@ import asyncio
 import logging
 
 import websockets
-from config.logger import setup_logging
-
+# from config.logger import setup_logging
+from loguru import logger
 
 class SuppressInvalidHandshakeFilter(logging.Filter):
     """过滤掉无效握手错误日志（如HTTPS访问WS端口）"""
@@ -42,7 +42,7 @@ TAG = __name__
 class WebSocketServer:
     def __init__(self, config: dict):
         self.config = config
-        self.logger = setup_logging()
+        self.logger = logger
         self.config_lock = asyncio.Lock()
         modules = initialize_modules(
             self.logger,

@@ -10,15 +10,15 @@ import traceback
 import threading
 import opuslib_next
 from abc import ABC, abstractmethod
-from config.logger import setup_logging
+# # from config.logger import setup_logging
 from typing import Optional, Tuple, List
 from core.handle.receiveAudioHandle import startToChat
 from core.handle.reportHandle import enqueue_asr_report
 from core.utils.util import remove_punctuation_and_length
 from core.handle.receiveAudioHandle import handleAudioMessage
-
+from loguru import logger
 TAG = __name__
-logger = setup_logging()
+# from loguru import logger
 
 
 class ASRProviderBase(ABC):

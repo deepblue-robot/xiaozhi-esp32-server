@@ -1,9 +1,9 @@
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from enum import Enum
 
 TAG = __name__
 
-logger = setup_logging()
+from loguru import logger
 
 
 class ToolType(Enum):
@@ -103,7 +103,7 @@ def register_device_function(name, desc, type=None):
 class FunctionRegistry:
     def __init__(self):
         self.function_registry = {}
-        self.logger = setup_logging()
+        self.logger = logger
 
     def register_function(self, name, func_item=None):
         # 如果提供了func_item，直接注册

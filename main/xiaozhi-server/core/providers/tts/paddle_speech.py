@@ -6,13 +6,13 @@ import asyncio
 import websockets
 import numpy as np
 from datetime import datetime
-from config.logger import setup_logging
+# from config.logger import setup_logging
 from core.providers.tts.base import TTSProviderBase
 
 
 
 TAG = __name__
-logger = setup_logging()
+from loguru import logger
 
 
 class TTSProvider(TTSProviderBase):
