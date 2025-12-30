@@ -1,3 +1,6 @@
+server:
+  port: 8000
+
 spring:
   application:
     name: xiaozhi-gateway
@@ -22,5 +25,23 @@ spring:
       - optional:classpath:application-${spring.profiles.active}.yaml # 加载【本地】配置
       - optional:nacos:${spring.application.name}-${spring.profiles.active}.yaml # 加载【Nacos】的配置
 
-
-
+  cloud:
+    gateway:
+      routes:
+        # 认证中心
+        - id: xiaozhi-auth
+          uri: lb://xiaozhi-auth
+          predicates:
+            - Path=/xiaozhi-auth/**
+          filters:
+            # 验证码处理
+            #- ImageCodeFilter
+            - StripPrefix=1
+        ## id只要唯一即可，名称任意
+        - id: xiaozhi-service
+          uri: http://localhost:8002/
+          predicates:
+            ## Path Route Predicate Factory断言
+            - Path=/xiaozhi-service/**
+          filters:
+            - StripPrefix=1

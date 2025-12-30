@@ -1,9 +1,10 @@
 --- #################### 注册中心 + 配置中心相关配置 ####################
+
 spring:
   cloud:
     nacos:
       server-addr: 10.16.33.68:8848 # Nacos 服务器地址
-      username: nacos # Nacos 账号
+      username: nacos        # Nacos 账号
       password: deepblue2022 # Nacos 密码
       discovery: # 【配置中心】配置项
         namespace: 0491f6be-08ea-4fab-bc14-e8269912f704 # 命名空间。这里使用 dev 开发环境
