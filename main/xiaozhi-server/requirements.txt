@@ -40,3 +40,6 @@ psutil==7.0.0
 portalocker==3.2.0
 Jinja2==3.1.6
 vosk==0.3.45
+nacos-sdk-python==2.1.0
+opuslib==3.0.1
+redis==5.3.1
