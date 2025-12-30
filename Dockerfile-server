@@ -3,5 +3,14 @@ FROM ghcr.io/xinnan-tech/xiaozhi-esp32-server:server-base
 
 COPY main/xiaozhi-server .
 
+
+WORKDIR /opt/xiaozhi-esp32-server
+
+# 复制requirements.txt
+COPY main/xiaozhi-server/requirements.txt .
+
+# 安装Python依赖
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt --default-timeout=120 --retries 5
 # 启动应用
 CMD ["python", "app.py"]

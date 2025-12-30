@@ -90,34 +90,3 @@ class LLMProvider(LLMProviderBase):
             f"fastgpt暂未实现完整的工具调用（function call），建议使用其他意图识别"
         )
 
-
-if __name__ == '__main__':
-    # 测试配置
-    api_key = "SUPPsYnAfcM6kK6y87jwtaUg"
-    base_url = "http://www.xiaobantoy.com:8019"  # 添加协议前缀
-    
-    # 创建配置字典
-    config = {
-        "api_key": api_key,
-        "base_url": base_url,
-        "detail": False
-    }
-    
-    # 创建LLMProvider实例
-    provider = LLMProvider(config)
-    
-    # 模拟对话历史
-    dialogue = [
-        {"role": "system", "content": "你是苏晓伴"},
-        {"role": "assistant", "content": "你好！有什么我可以帮你的吗？"},
-        {"role": "user", "content": "你能告诉我今天的天气怎么样吗？"}
-    ]
-    
-    # 调用response方法进行测试
-    print("开始测试response方法:")
-    try:
-        for response_chunk in provider.response("test_session_123", dialogue):
-            print(response_chunk, end="", flush=True)
-        print("\n测试完成")
-    except Exception as e:
-        print(f"\n测试过程中出现错误: {e}")
