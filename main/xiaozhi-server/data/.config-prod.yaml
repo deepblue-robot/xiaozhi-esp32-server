@@ -47,4 +47,4 @@ nacos:
     namespace: 0491f6be-08ea-4fab-bc14-e8269912f704
     group: DEFAULT_GROUP
     data_id: agent-config
-    service_name: xiaozhi-agent
+    service_name: deepblue-agent
