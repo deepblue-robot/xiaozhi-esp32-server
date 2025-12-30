@@ -17,7 +17,7 @@ from core.utils.util import (
     check_asr_update,
     filter_sensitive_info,
 )
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from collections import deque
 from core.utils.modules_initialize import (
     initialize_modules,
@@ -42,6 +42,12 @@ from core.utils.prompt_manager import PromptManager
 from core.utils.voiceprint_provider import VoiceprintProvider
 from core.utils import textUtils
 from loguru import logger
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 新增：导入聊天缓存管理器
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+from core.chat_cache.chat_cache_manager import ChatCacheManager
+
 TAG = __name__
 
 # auto_import_modules("plugins_func.functions")
@@ -61,19 +67,23 @@ class ConnectionHandler:
         _memory,
         _intent,
         server=None,
+        chat_cache: Optional[ChatCacheManager] = None,  # 新增：聊天缓存管理器
     ):
         self.common_config = config
         self.config = copy.deepcopy(config)
         self.session_id = str(uuid.uuid4())
         self.logger = logger
         self.server = server  # 保存server实例的引用
-
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        # 新增：聊天缓存相关
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        self.chat_cache = chat_cache
         self.need_bind = False  # 是否需要绑定设备
         self.bind_completed_event = asyncio.Event()
         self.bind_code = None  # 绑定设备的验证码
         self.last_bind_prompt_time = 0  # 上次播放绑定提示的时间戳(秒)
         self.bind_prompt_interval = 60  # 绑定提示播放间隔(秒)
-
+        self.chat_cache_enabled = True
         self.read_config_from_api = self.config.get("read_config_from_api", False)
 
         self.websocket = None
@@ -200,7 +210,10 @@ class ConnectionHandler:
 
             # 启动超时检查任务
             self.timeout_task = asyncio.create_task(self._check_timeout())
-
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            # 新增：恢复聊天历史
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            await self._restore_chat_history()
             self.welcome_msg = self.config["xiaozhi"]
             self.welcome_msg["session_id"] = self.session_id
 
@@ -233,9 +246,148 @@ class ConnectionHandler:
                         f"强制关闭连接时出错: {close_error}"
                     )
 
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # 新增：聊天缓存相关方法
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    async def _restore_chat_history(self):
+        """恢复聊天历史"""
+        if not self.chat_cache_enabled or not self.device_id:
+            return
+
+        try:
+            # 开始会话，自动恢复历史消息
+            session_info, history_messages = self.chat_cache.start_session(
+                device_id=self.device_id,
+                session_id=self.session_id,
+                user_id=self.headers.get("user-id"),
+                client_ip=self.client_ip,
+                restore_previous=True,
+            )
+
+            if history_messages:
+                self.restored_history = history_messages
+                self.logger.bind(tag=TAG).info(
+                    f"设备 {self.device_id} 恢复了 {len(history_messages)} 条历史消息"
+                )
+
+                # 将历史消息加载到对话上下文中
+                for msg in history_messages:
+                    self.dialogue.put(Message(role=msg.role, content=msg.content))
+
+                # 可选：通知客户端已恢复历史对话
+                await self._notify_history_restored(len(history_messages))
+
+        except Exception as e:
+            self.logger.bind(tag=TAG).error(f"恢复聊天历史失败: {e}")
+
+    async def _notify_history_restored(self, count: int):
+        """通知客户端已恢复历史对话"""
+        try:
+            if self.websocket:
+                await self.websocket.send(
+                    json.dumps(
+                        {
+                            "type": "session",
+                            "action": "history_restored",
+                            "count": count,
+                            "session_id": self.session_id,
+                            "message": f"已恢复 {count} 条历史消息",
+                        },
+                        ensure_ascii=False,
+                    )
+                )
+        except Exception as e:
+            self.logger.bind(tag=TAG).warning(f"通知客户端恢复历史失败: {e}")
+
+    def _cache_user_message(self, content: str, content_type: str = "text"):
+        """缓存用户消息"""
+        if not self.chat_cache_enabled or not self.device_id:
+            return
+
+        try:
+            self.chat_cache.add_user_message(
+                device_id=self.device_id,
+                content=content,
+                message_id=str(uuid.uuid4()),
+                metadata={
+                    "session_id": self.session_id,
+                    "content_type": content_type,
+                },
+            )
+        except Exception as e:
+            self.logger.bind(tag=TAG).error(f"缓存用户消息失败: {e}")
+
+    def _cache_assistant_message(
+        self,
+        content: str,
+        model: str = None,
+        tokens: int = None,
+        latency_ms: int = None,
+    ):
+        """缓存助手消息"""
+        if not self.chat_cache_enabled or not self.device_id:
+            return
+
+        try:
+            self.chat_cache.add_assistant_message(
+                device_id=self.device_id,
+                content=content,
+                message_id=str(uuid.uuid4()),
+                metadata={
+                    "session_id": self.session_id,
+                    "model": model or getattr(self.llm, "model_name", None),
+                    "tokens": tokens,
+                    "latency_ms": latency_ms,
+                },
+            )
+        except Exception as e:
+            self.logger.bind(tag=TAG).error(f"缓存助手消息失败: {e}")
+    def _end_chat_cache_session(self, clear_cache: bool = False):
+        """结束聊天缓存会话"""
+        if not self.chat_cache_enabled or not self.device_id:
+            return
+
+        try:
+            self.chat_cache.end_session(
+                device_id=self.device_id,
+                clear_cache=clear_cache,  # 默认不清除，以便恢复
+            )
+        except Exception as e:
+            self.logger.bind(tag=TAG).error(f"结束聊天缓存会话失败: {e}")
+
+    async def clear_chat_history(self):
+        """清除聊天历史（用户主动调用）"""
+        if not self.chat_cache_enabled or not self.device_id:
+            return
+
+        try:
+            self.chat_cache.clear_cache(self.device_id)
+            self.dialogue.clear()  # 同时清除对话上下文
+            self.restored_history = []
+            self.logger.bind(tag=TAG).info(f"设备 {self.device_id} 已清除聊天历史")
+
+            # 通知客户端
+            if self.websocket:
+                await self.websocket.send(
+                    json.dumps(
+                        {
+                            "type": "session",
+                            "action": "history_cleared",
+                            "session_id": self.session_id,
+                        },
+                        ensure_ascii=False,
+                    )
+                )
+        except Exception as e:
+            self.logger.bind(tag=TAG).error(f"清除聊天历史失败: {e}")
+
     async def _save_and_close(self, ws):
         """保存记忆并关闭连接"""
         try:
+            # 结束聊天缓存会话（保留缓存以便恢复）
+            self._end_chat_cache_session(clear_cache=False)
+
             if self.memory:
                 # 使用线程池异步保存记忆
                 def save_memory_task():
@@ -789,12 +941,19 @@ class ConnectionHandler:
     def chat(self, query, depth=0):
         if query is not None:
             self.logger.bind(tag=TAG).info(f"大模型收到用户消息: {query}")
+        # 记录开始时间（用于计算延迟）
+        chat_start_time = time.time()
 
         # 为最顶层时新建会话ID和发送FIRST请求
         if depth == 0:
             self.llm_finish_task = False
             self.sentence_id = str(uuid.uuid4().hex)
             self.dialogue.put(Message(role="user", content=query))
+
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            # 新增：缓存用户消息
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            self._cache_user_message(query)
             self.tts.tts_text_queue.put(
                 TTSMessageDTO(
                     sentence_id=self.sentence_id,
@@ -979,6 +1138,16 @@ class ConnectionHandler:
             text_buff = "".join(response_message)
             self.tts_MessageText = text_buff
             self.dialogue.put(Message(role="assistant", content=text_buff))
+
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            # 新增：缓存助手消息
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            if depth == 0:
+                latency_ms = int((time.time() - chat_start_time) * 1000)
+                self._cache_assistant_message(
+                    content=text_buff,
+                    latency_ms=latency_ms,
+                )
         if depth == 0:
             self.tts.tts_text_queue.put(
                 TTSMessageDTO(

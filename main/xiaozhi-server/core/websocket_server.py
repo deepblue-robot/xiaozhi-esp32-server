@@ -1,9 +1,10 @@
 import asyncio
 import logging
+from typing import Optional
 
 import websockets
-# from config.logger import setup_logging
 from loguru import logger
+from core.chat_cache.chat_cache_manager import ChatCacheManager
 
 class SuppressInvalidHandshakeFilter(logging.Filter):
     """过滤掉无效握手错误日志（如HTTPS访问WS端口）"""
@@ -40,8 +41,9 @@ TAG = __name__
 
 
 class WebSocketServer:
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, chat_cache: Optional[ChatCacheManager]):
         self.config = config
+        self.chat_cache = chat_cache
         self.logger = logger
         self.config_lock = asyncio.Lock()
         modules = initialize_modules(
@@ -123,6 +125,7 @@ class WebSocketServer:
             self._memory,
             self._intent,
             self,  # 传入server实例
+            chat_cache=self.chat_cache,
         )
         try:
             await handler.handle_connection(websocket)

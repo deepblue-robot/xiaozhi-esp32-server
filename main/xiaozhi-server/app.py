@@ -12,6 +12,7 @@ from core.websocket_server import WebSocketServer
 from core.utils.util import check_ffmpeg_installed
 from core.utils.gc_manager import get_gc_manager
 from core.utils.cache.redis_manager import GlobalCacheManager
+from core.chat_cache.chat_cache_manager import ChatCacheManager
 TAG = __name__
 from loguru import logger
 
@@ -62,11 +63,33 @@ async def main():
     )
     # 测试
     cache_redis.set(CacheType.CONFIG, "001", "hello redis")
+
+    # 新增：初始化聊天缓存管理器
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    chat_cache = None
+    chat_cache_config = config.get("chat_cache", {})
+
+    if chat_cache_config.get("enabled", True):
+        try:
+            chat_cache = ChatCacheManager(
+                redis_client = cache_redis.redis_client,
+                key_prefix=chat_cache_config.get("key_prefix", "xiaozhi:chat:cache"),
+                default_ttl=chat_cache_config.get("default_ttl", 86400),  # 24小时
+                max_messages=chat_cache_config.get("max_messages", 100),
+            )
+            logger.bind(tag=TAG).info(
+                f"聊天缓存管理器已启动 - TTL: {chat_cache.default_ttl}s, 最大消息数: {chat_cache.max_messages}"
+            )
+        except Exception as e:
+            logger.bind(tag=TAG).error(f"聊天缓存管理器初始化失败: {e}")
+            chat_cache = None
+    else:
+        logger.bind(tag=TAG).info("聊天缓存功能已禁用")
     # auth_key优先级：配置文件server.auth_key > manager-api.secret > 自动生成
     # auth_key用于jwt认证，比如视觉分析接口的jwt认证、ota接口的token生成与websocket认证
     # 获取配置文件中的auth_key
     auth_key = config["server"].get("auth_key", "")
-    
+
     # 验证auth_key，无效则尝试使用manager-api.secret
     if not auth_key or len(auth_key) == 0 or "你" in auth_key:
         auth_key = config.get("manager-api", {}).get("secret", "")
@@ -84,7 +107,7 @@ async def main():
     await gc_manager.start()
 
     # 启动 WebSocket 服务器
-    ws_server = WebSocketServer(config)
+    ws_server = WebSocketServer(config, chat_cache=chat_cache)
     ws_task = asyncio.create_task(ws_server.start())
     # 启动 Simple http 服务器
     ota_server = SimpleHttpServer(config)
@@ -146,7 +169,17 @@ async def main():
     finally:
         # 停止全局GC管理器
         await gc_manager.stop()
-
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        # 新增：清理聊天缓存（可选：打印统计信息）
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        if chat_cache:
+            try:
+                stats = chat_cache.get_cache_stats()
+                logger.bind(tag=TAG).info(
+                    f"聊天缓存统计 - 活跃设备: {stats['active_devices']}, 总消息数: {stats['total_messages']}"
+                )
+            except Exception as e:
+                logger.bind(tag=TAG).warning(f"获取聊天缓存统计失败: {e}")
         # 取消所有任务（关键修复点）
         stdin_task.cancel()
         ws_task.cancel()

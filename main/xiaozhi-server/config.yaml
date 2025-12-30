@@ -1013,3 +1013,9 @@ TTS:
     # volume: 50  # 音量：0-100
     # speed: 50  # 语速：0-100
     # pitch: 50  # 语调：0-100
+chat_cache:
+  enabled: true
+  key_prefix: "xiaozhi:chat:cache"
+  default_ttl: 86400          # 24 小时
+  max_messages: 100           # 每设备最大消息数
+  restore_on_connect: true    # 连接时自动恢复
