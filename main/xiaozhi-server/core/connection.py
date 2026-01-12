@@ -71,7 +71,7 @@ class ConnectionHandler:
     ):
         self.common_config = config
         self.config = copy.deepcopy(config)
-        self.session_id = str(uuid.uuid4())
+        self.session_id = None  # 将在 handle_connection 中从 headers 获取或生成
         self.logger = logger
         self.server = server  # 保存server实例的引用
         # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -195,6 +195,15 @@ class ConnectionHandler:
 
             self.device_id = self.headers.get("device-id", None)
 
+            # 从 headers 获取 session_id，如果没有则生成新的
+            header_session_id = self.headers.get("session-id", None)
+            if header_session_id:
+                self.session_id = header_session_id
+                self.logger.bind(tag=TAG).info(f"使用客户端提供的 session_id: {self.session_id}")
+            else:
+                self.session_id = str(uuid.uuid4())
+                self.logger.bind(tag=TAG).info(f"生成新的 session_id: {self.session_id}")
+
             # 认证通过,继续处理
             self.websocket = ws
 
@@ -276,7 +285,7 @@ class ConnectionHandler:
                     self.dialogue.put(Message(role=msg.role, content=msg.content))
 
                 # 可选：通知客户端已恢复历史对话
-                await self._notify_history_restored(len(history_messages))
+                # await self._notify_history_restored(len(history_messages))
 
         except Exception as e:
             self.logger.bind(tag=TAG).error(f"恢复聊天历史失败: {e}")
@@ -302,16 +311,16 @@ class ConnectionHandler:
 
     def _cache_user_message(self, content: str, content_type: str = "text"):
         """缓存用户消息"""
-        if not self.chat_cache_enabled or not self.device_id:
+        if not self.chat_cache_enabled or not self.device_id or not self.session_id:
             return
 
         try:
             self.chat_cache.add_user_message(
                 device_id=self.device_id,
+                session_id=self.session_id,
                 content=content,
                 message_id=str(uuid.uuid4()),
                 metadata={
-                    "session_id": self.session_id,
                     "content_type": content_type,
                 },
             )
@@ -326,16 +335,16 @@ class ConnectionHandler:
         latency_ms: int = None,
     ):
         """缓存助手消息"""
-        if not self.chat_cache_enabled or not self.device_id:
+        if not self.chat_cache_enabled or not self.device_id or not self.session_id:
             return
 
         try:
             self.chat_cache.add_assistant_message(
                 device_id=self.device_id,
+                session_id=self.session_id,
                 content=content,
                 message_id=str(uuid.uuid4()),
                 metadata={
-                    "session_id": self.session_id,
                     "model": model or getattr(self.llm, "model_name", None),
                     "tokens": tokens,
                     "latency_ms": latency_ms,
@@ -345,12 +354,13 @@ class ConnectionHandler:
             self.logger.bind(tag=TAG).error(f"缓存助手消息失败: {e}")
     def _end_chat_cache_session(self, clear_cache: bool = False):
         """结束聊天缓存会话"""
-        if not self.chat_cache_enabled or not self.device_id:
+        if not self.chat_cache_enabled or not self.device_id or not self.session_id:
             return
 
         try:
             self.chat_cache.end_session(
                 device_id=self.device_id,
+                session_id=self.session_id,
                 clear_cache=clear_cache,  # 默认不清除，以便恢复
             )
         except Exception as e:
@@ -358,11 +368,11 @@ class ConnectionHandler:
 
     async def clear_chat_history(self):
         """清除聊天历史（用户主动调用）"""
-        if not self.chat_cache_enabled or not self.device_id:
+        if not self.chat_cache_enabled or not self.device_id or not self.session_id:
             return
 
         try:
-            self.chat_cache.clear_cache(self.device_id)
+            self.chat_cache.clear_cache(self.device_id, self.session_id)
             self.dialogue.clear()  # 同时清除对话上下文
             self.restored_history = []
             self.logger.bind(tag=TAG).info(f"设备 {self.device_id} 已清除聊天历史")

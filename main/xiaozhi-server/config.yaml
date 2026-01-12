@@ -445,7 +445,7 @@ ASR:
     # 2.创建API-KEY  https://bailian.console.aliyun.com/#/api-key
     # 3.Qwen3-ASR-Flash基于通义千问多模态基座，支持多语言识别、歌唱识别、噪声拒识等功能
     type: qwen3_asr_flash
-    api_key: 你的阿里云百炼API密钥
+    api_key: sk-51cbb3d6c1b948ff8e2f9229e21e7cbf
     base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
     model_name: qwen3-asr-flash
     output_dir: tmp/
@@ -464,9 +464,9 @@ ASR:
     # - APIKey
     type: xunfei_stream
     # 必填参数 - 讯飞开放平台应用信息
-    app_id: 你的APPID
-    api_key: 你的APIKey
-    api_secret: 你的APISecret
+    app_id: 2e1331a1
+    api_key: 3c3b44a575b358dcbe4c122c398a0f66
+    api_secret: OTU5ZjMzOWQ5YTYzMTA2YmU3YmJlMzY5
     # 识别参数配置
     domain: slm # 识别领域，iat:日常用语，medical:医疗，finance:金融等
     language: zh_cn # 语言，zh_cn:中文，en_us:英文
@@ -481,6 +481,15 @@ VAD:
     threshold_low: 0.3
     model_dir: models/snakers4_silero-vad
     min_silence_duration_ms: 200  # 如果说话停顿比较长，可以把这个值设置大一些
+
+  # ONNX 轻量版 Silero VAD（推荐，镜像减小约 2GB）
+  # 使用前需下载模型: ./scripts/download_silero_onnx.sh
+  SileroONNX:
+    type: silero_onnx
+    model_path: models/silero_vad.onnx
+    threshold: 0.5
+    threshold_low: 0.3
+    min_silence_duration_ms: 200
 
 LLM:
   # 所有openai类型均可以修改超参，以AliLLM为例
@@ -1019,3 +1028,102 @@ chat_cache:
   default_ttl: 86400          # 24 小时
   max_messages: 100           # 每设备最大消息数
   restore_on_connect: true    # 连接时自动恢复
+
+# #####################################################################################
+# ################################以下是RAG知识库配置######################################
+# RAG (Retrieval-Augmented Generation) 检索增强生成配置
+RAG:
+  # 是否启用RAG
+  enabled: false
+  # 向量数据库配置
+  vectorstore:
+    # 类型：chroma（轻量级，基于SQLite）
+    type: chroma
+    # 持久化目录
+    persist_directory: data/vectorstore/chroma
+    # 集合名称（相当于数据库表）
+    collection_name: knowledge_base
+
+  # Embedding模型配置
+  embedding:
+    # 类型：aliyun（阿里通义）、openai、local（本地BGE）
+    type: aliyun
+    # 模型名称
+    model_name: text-embedding-v3
+    # 向量维度（根据模型自动设置）
+    # aliyun text-embedding-v3: 1024
+    # openai text-embedding-3-small: 1536
+    # openai text-embedding-3-large: 3072
+    dimension: 1024
+
+  # 文档处理配置
+  document:
+    # 分块大小（字符数）
+    chunk_size: 500
+    # 分块重叠（字符数）
+    chunk_overlap: 50
+    # 支持的文件类型
+    supported_extensions:
+      - .pdf
+      - .docx
+      - .doc
+      - .txt
+      - .md
+      - .html
+      - .csv
+      - .xlsx
+
+  # 检索配置
+  retrieval:
+    # 返回的文档数量
+    top_k: 5
+    # 相似度阈值（0-1，低于此值不返回）
+    score_threshold: 0.5
+    # 是否启用混合检索（向量+关键词）
+    hybrid_search: false
+    # 是否启用重排序
+    rerank: false
+    # 重排序模型（如启用）
+    rerank_model: bge-reranker-base
+
+# Embedding服务配置（与LLM类似的Provider模式）
+Embedding:
+  AliyunEmbedding:
+    # 阿里通义文本向量模型
+    # API文档：https://help.aliyun.com/zh/model-studio/developer-reference/text-embedding-api
+    # 可在这里找到你的 api_key https://bailian.console.aliyun.com/?apiKey=1#/api-key
+    type: aliyun
+    api_key: sk-98be5102ffbd415396d765b32bcada20
+    model_name: text-embedding-v3
+    # 向量维度：1024
+    dimension: 1024
+
+  OpenAIEmbedding:
+    # OpenAI Embedding模型
+    # API文档：https://platform.openai.com/docs/guides/embeddings
+    type: openai
+    api_key: 你的OpenAI API密钥
+    base_url: https://api.openai.com/v1
+    model_name: text-embedding-3-small
+    # 向量维度：1536（small）或 3072（large）
+    dimension: 1536
+
+  ZhipuEmbedding:
+    # 智谱AI Embedding模型
+    # API文档：https://open.bigmodel.cn/dev/api/vector/embedding-3
+    type: openai
+    api_key: 你的智谱AI API密钥
+    base_url: https://open.bigmodel.cn/api/paas/v4/
+    model_name: embedding-3
+    # 向量维度：2048
+    dimension: 2048
+
+  LocalBGEEmbedding:
+    # 本地BGE模型（完全私有化）
+    # 模型下载：https://huggingface.co/BAAI/bge-m3
+    type: local
+    model_path: models/bge-m3
+    # 向量维度：1024
+    dimension: 1024
+    # 是否使用GPU
+    use_gpu: false

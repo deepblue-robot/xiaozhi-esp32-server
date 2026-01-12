@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 #--------- 本项目推荐环境是python3.10，以下暂时不推荐升级的依赖
-torch==2.2.2
-torchaudio==2.2.2
-numpy==1.26.4
+#torch==2.2.2
+#torchaudio==2.2.2
+#numpy==1.26.4
 #--------- cozepy0.20.0要求websockets<15.0.0，以下暂时不推荐升级的依赖
 websockets==14.2
 #--------- 以下是可升级的依赖
@@ -43,3 +43,14 @@ vosk==0.3.45
 nacos-sdk-python==2.0.9
 opuslib==3.0.1
 redis==5.3.1
+
+#--------- RAG相关依赖
+#chromadb==1.0.0
+#langchain==0.3.18
+#langchain-community==0.3.17
+#langchain-openai==0.3.5
+#langchain-chroma==0.2.2
+#pypdf==5.4.0
+#python-docx==1.1.2
+#unstructured==0.16.23
+#tiktoken==0.9.0

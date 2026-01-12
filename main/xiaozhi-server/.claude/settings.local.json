@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(tree:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Skill(explaining-code)",
+      "Bash(chmod:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(xxd:*)"
     ],
     "deny": [],
     "ask": []

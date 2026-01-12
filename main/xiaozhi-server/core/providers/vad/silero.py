@@ -1,16 +1,34 @@
 import time
 import numpy as np
-import torch
 import opuslib_next
 # from config.logger import setup_logging
 from core.providers.vad.base import VADProviderBase
+from loguru import logger
 
 TAG = __name__
-from loguru import logger
+
+# 尝试导入 torch，如果失败则标记为不可用
+TORCH_AVAILABLE = False
+torch = None
+
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError as e:
+    logger.bind(tag=TAG).warning(f"torch 导入失败，SileroVAD 将不可用: {e}")
+except Exception as e:
+    logger.bind(tag=TAG).warning(f"torch 加载异常，SileroVAD 将不可用: {e}")
 
 
 class VADProvider(VADProviderBase):
     def __init__(self, config):
+        # 检查 torch 是否可用
+        if not TORCH_AVAILABLE:
+            raise ImportError(
+                "torch 不可用，SileroVAD 无法使用。"
+                "请安装 torch，或在配置中切换到 SileroONNX（不依赖 torch）"
+            )
+
         logger.bind(tag=TAG).info("SileroVAD", config)
         self.model, _ = torch.hub.load(
             repo_or_dir=config["model_dir"],

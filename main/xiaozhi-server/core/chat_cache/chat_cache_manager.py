@@ -102,13 +102,13 @@ class ChatCacheManager:
     # Key 生成方法
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    def _messages_key(self, device_id: str) -> str:
-        """消息列表 key"""
-        return f"{self.key_prefix}:messages:{device_id}"
+    def _messages_key(self, device_id: str, session_id: str) -> str:
+        """消息列表 key (基于 device_id + session_id)"""
+        return f"{self.key_prefix}:messages:{device_id}:{session_id}"
 
-    def _session_key(self, device_id: str) -> str:
-        """会话信息 key"""
-        return f"{self.key_prefix}:session:{device_id}"
+    def _session_key(self, device_id: str, session_id: str) -> str:
+        """会话信息 key (基于 device_id + session_id)"""
+        return f"{self.key_prefix}:session:{device_id}:{session_id}"
 
     def _device_index_key(self) -> str:
         """设备索引 key（用于管理所有活跃设备）"""
@@ -132,7 +132,7 @@ class ChatCacheManager:
 
         Args:
             device_id: 设备 ID
-            session_id: 当前会话 ID
+            session_id: 当前会话 ID (用于恢复历史消息)
             user_id: 用户 ID
             client_ip: 客户端 IP
             metadata: 额外元数据
@@ -143,12 +143,12 @@ class ChatCacheManager:
         """
         previous_messages = []
 
-        # 检查是否有之前的会话
+        # 检查是否有之前的会话 (基于 device_id + session_id)
         if restore_previous:
-            previous_messages = self.get_messages(device_id)
+            previous_messages = self.get_messages(device_id, session_id)
             if previous_messages:
                 logger.bind(tag=TAG).info(
-                    f"恢复设备 {device_id} 的历史会话，共 {len(previous_messages)} 条消息"
+                    f"恢复设备 {device_id} 会话 {session_id} 的历史记录，共 {len(previous_messages)} 条消息"
                 )
 
         # 创建/更新会话信息
@@ -164,41 +164,42 @@ class ChatCacheManager:
         self._save_session_info(session_info)
 
         # 添加到设备索引
-        self.redis.sadd(self._device_index_key(), device_id)
+        self.redis.sadd(self._device_index_key(), f"{device_id}:{session_id}")
 
         return session_info, previous_messages
 
-    def end_session(self, device_id: str, clear_cache: bool = False):
+    def end_session(self, device_id: str, session_id: str, clear_cache: bool = False):
         """
         结束会话
 
         Args:
             device_id: 设备 ID
+            session_id: 会话 ID
             clear_cache: 是否清除缓存（默认保留，以便恢复）
         """
         if clear_cache:
-            self.clear_cache(device_id)
+            self.clear_cache(device_id, session_id)
         else:
             # 更新会话结束时间
-            session_info = self.get_session_info(device_id)
+            session_info = self.get_session_info(device_id, session_id)
             if session_info:
                 session_info.updated_at = time.time()
                 self._save_session_info(session_info)
 
-        logger.bind(tag=TAG).debug(f"会话结束: device_id={device_id}, clear={clear_cache}")
+        logger.bind(tag=TAG).debug(f"会话结束: device_id={device_id}, session_id={session_id}, clear={clear_cache}")
 
     def _save_session_info(self, session_info: SessionInfo):
         """保存会话信息"""
-        key = self._session_key(session_info.device_id)
+        key = self._session_key(session_info.device_id, session_info.session_id)
         self.redis.set(
             key,
             json.dumps(session_info.to_dict(), ensure_ascii=False),
             ex=self.default_ttl
         )
 
-    def get_session_info(self, device_id: str) -> Optional[SessionInfo]:
+    def get_session_info(self, device_id: str, session_id: str) -> Optional[SessionInfo]:
         """获取会话信息"""
-        key = self._session_key(device_id)
+        key = self._session_key(device_id, session_id)
         data = self.redis.get(key)
         if data:
             return SessionInfo.from_dict(json.loads(data))
@@ -211,6 +212,7 @@ class ChatCacheManager:
     def add_message(
             self,
             device_id: str,
+            session_id: str,
             role: str,
             content: str,
             message_id: Optional[str] = None,
@@ -221,6 +223,7 @@ class ChatCacheManager:
 
         Args:
             device_id: 设备 ID
+            session_id: 会话 ID
             role: 角色 (user/assistant/system)
             content: 消息内容
             message_id: 消息 ID
@@ -237,7 +240,7 @@ class ChatCacheManager:
             metadata=metadata or {},
         )
 
-        key = self._messages_key(device_id)
+        key = self._messages_key(device_id, session_id)
 
         # 使用 pipeline 保证原子性
         pipe = self.redis.pipeline()
@@ -254,7 +257,7 @@ class ChatCacheManager:
         pipe.execute()
 
         logger.bind(tag=TAG).debug(
-            f"添加消息: device_id={device_id}, role={role}, content_len={len(content)}"
+            f"添加消息: device_id={device_id}, session_id={session_id}, role={role}, content_len={len(content)}"
         )
 
         return message
@@ -262,33 +265,37 @@ class ChatCacheManager:
     def add_user_message(
             self,
             device_id: str,
+            session_id: str,
             content: str,
             **kwargs
     ) -> ChatMessage:
         """添加用户消息"""
-        return self.add_message(device_id, MessageRole.USER.value, content, **kwargs)
+        return self.add_message(device_id, session_id, MessageRole.USER.value, content, **kwargs)
 
     def add_assistant_message(
             self,
             device_id: str,
+            session_id: str,
             content: str,
             **kwargs
     ) -> ChatMessage:
         """添加助手消息"""
-        return self.add_message(device_id, MessageRole.ASSISTANT.value, content, **kwargs)
+        return self.add_message(device_id, session_id, MessageRole.ASSISTANT.value, content, **kwargs)
 
     def add_system_message(
             self,
             device_id: str,
+            session_id: str,
             content: str,
             **kwargs
     ) -> ChatMessage:
         """添加系统消息"""
-        return self.add_message(device_id, MessageRole.SYSTEM.value, content, **kwargs)
+        return self.add_message(device_id, session_id, MessageRole.SYSTEM.value, content, **kwargs)
 
     def get_messages(
             self,
             device_id: str,
+            session_id: str,
             limit: Optional[int] = None,
             include_system: bool = True,
     ) -> List[ChatMessage]:
@@ -297,13 +304,14 @@ class ChatCacheManager:
 
         Args:
             device_id: 设备 ID
+            session_id: 会话 ID
             limit: 返回消息数量限制（None 表示全部）
             include_system: 是否包含系统消息
 
         Returns:
             消息列表
         """
-        key = self._messages_key(device_id)
+        key = self._messages_key(device_id, session_id)
 
         if limit:
             # 获取最近 N 条
@@ -326,6 +334,7 @@ class ChatCacheManager:
     def get_messages_for_llm(
             self,
             device_id: str,
+            session_id: str,
             limit: Optional[int] = None,
             include_system: bool = False,
     ) -> List[dict]:
@@ -335,55 +344,59 @@ class ChatCacheManager:
         Returns:
             [{"role": "user", "content": "..."}, ...]
         """
-        messages = self.get_messages(device_id, limit, include_system)
+        messages = self.get_messages(device_id, session_id, limit, include_system)
         return [msg.to_llm_format() for msg in messages]
 
-    def get_message_count(self, device_id: str) -> int:
+    def get_message_count(self, device_id: str, session_id: str) -> int:
         """获取消息数量"""
-        key = self._messages_key(device_id)
+        key = self._messages_key(device_id, session_id)
         return self.redis.llen(key)
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     # 缓存管理
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    def clear_cache(self, device_id: str):
-        """清除设备的所有缓存"""
+    def clear_cache(self, device_id: str, session_id: str):
+        """清除指定会话的所有缓存"""
         pipe = self.redis.pipeline()
-        pipe.delete(self._messages_key(device_id))
-        pipe.delete(self._session_key(device_id))
-        pipe.srem(self._device_index_key(), device_id)
+        pipe.delete(self._messages_key(device_id, session_id))
+        pipe.delete(self._session_key(device_id, session_id))
+        pipe.srem(self._device_index_key(), f"{device_id}:{session_id}")
         pipe.execute()
 
-        logger.bind(tag=TAG).info(f"已清除设备缓存: {device_id}")
+        logger.bind(tag=TAG).info(f"已清除会话缓存: device_id={device_id}, session_id={session_id}")
 
-    def refresh_ttl(self, device_id: str, ttl: Optional[int] = None):
+    def refresh_ttl(self, device_id: str, session_id: str, ttl: Optional[int] = None):
         """刷新缓存过期时间"""
         ttl = ttl or self.default_ttl
         pipe = self.redis.pipeline()
-        pipe.expire(self._messages_key(device_id), ttl)
-        pipe.expire(self._session_key(device_id), ttl)
+        pipe.expire(self._messages_key(device_id, session_id), ttl)
+        pipe.expire(self._session_key(device_id, session_id), ttl)
         pipe.execute()
 
-    def has_cache(self, device_id: str) -> bool:
-        """检查设备是否有缓存"""
-        return self.redis.exists(self._messages_key(device_id)) > 0
+    def has_cache(self, device_id: str, session_id: str) -> bool:
+        """检查指定会话是否有缓存"""
+        return self.redis.exists(self._messages_key(device_id, session_id)) > 0
 
-    def get_active_devices(self) -> List[str]:
-        """获取所有活跃设备"""
+    def get_active_sessions(self) -> List[str]:
+        """获取所有活跃会话 (格式: device_id:session_id)"""
         return list(self.redis.smembers(self._device_index_key()))
 
     def get_cache_stats(self) -> dict:
         """获取缓存统计信息"""
-        devices = self.get_active_devices()
+        sessions = self.get_active_sessions()
         total_messages = 0
 
-        for device_id in devices:
-            total_messages += self.get_message_count(device_id)
+        for session_key in sessions:
+            # session_key 格式为 device_id:session_id
+            parts = session_key.split(":", 1)
+            if len(parts) == 2:
+                device_id, session_id = parts
+                total_messages += self.get_message_count(device_id, session_id)
 
         return {
-            "active_devices": len(devices),
+            "active_sessions": len(sessions),
             "total_messages": total_messages,
-            "max_messages_per_device": self.max_messages,
+            "max_messages_per_session": self.max_messages,
             "default_ttl": self.default_ttl,
         }

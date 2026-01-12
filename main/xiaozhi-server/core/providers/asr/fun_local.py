@@ -8,13 +8,25 @@ import asyncio
 
 # # from config.logger import setup_logging
 from typing import Optional, Tuple, List
-from funasr import AutoModel
-from funasr.utils.postprocess_utils import rich_transcription_postprocess
 from core.providers.asr.base import ASRProviderBase
 from core.providers.asr.dto.dto import InterfaceType
 from loguru import logger
+
 TAG = __name__
-# from loguru import logger
+
+# 尝试导入 funasr，如果失败则标记为不可用
+FUNASR_AVAILABLE = False
+AutoModel = None
+rich_transcription_postprocess = None
+
+try:
+    from funasr import AutoModel
+    from funasr.utils.postprocess_utils import rich_transcription_postprocess
+    FUNASR_AVAILABLE = True
+except ImportError as e:
+    logger.bind(tag=TAG).warning(f"FunASR 导入失败，fun_local ASR 将不可用: {e}")
+except Exception as e:
+    logger.bind(tag=TAG).warning(f"FunASR 加载异常，fun_local ASR 将不可用: {e}")
 
 MAX_RETRIES = 2
 RETRY_DELAY = 1  # 重试延迟（秒）
@@ -40,7 +52,14 @@ class CaptureOutput:
 class ASRProvider(ASRProviderBase):
     def __init__(self, config: dict, delete_audio_file: bool):
         super().__init__()
-        
+
+        # 检查 FunASR 是否可用
+        if not FUNASR_AVAILABLE:
+            raise ImportError(
+                "FunASR 不可用，请安装 funasr 及其依赖（包括 torch），"
+                "或在配置中切换到其他 ASR 服务（如 DoubaoASR、AliyunASR、Qwen3ASRFlash 等）"
+            )
+
         # 内存检测，要求大于2G
         min_mem_bytes = 2 * 1024 * 1024 * 1024
         total_mem = psutil.virtual_memory().total
