@@ -68,8 +68,16 @@
             <appender-ref ref="ERROR_FILE" />
         </root>
         <logger name="xiaozhi" level="DEBUG" />
-        <logger name="org.springframework.web" level="INFO" />
-        <logger name="org.springboot.sample" level="INFO" />
+        <logger name="org.springframework" level="DEBUG" />
+        <logger name="org.springboot" level="DEBUG" />
+        <logger name="com.alibaba.druid" level="DEBUG"/>
+        <logger name="com.alibaba.druid.pool.DruidDataSource" level="TRACE"/>
+        <!-- 抑制RMI和JMX相关的调试日志 -->
+        <logger name="sun.rmi" level="WARN" />
+        <logger name="com.sun.jmx" level="WARN" />
+        <logger name="javax.management" level="WARN" />
+        <logger name="org.springframework.jmx" level="WARN" />
+        <logger name="org.springframework.boot.actuate" level="WARN" />
     </springProfile>
     
     <!-- 测试环境配置 -->
@@ -82,6 +90,12 @@
         <logger name="xiaozhi" level="INFO" />
         <logger name="org.springframework.web" level="INFO" />
         <logger name="org.springboot.sample" level="INFO" />
+        <!-- 抑制RMI和JMX相关的调试日志 -->
+        <logger name="sun.rmi" level="WARN" />
+        <logger name="com.sun.jmx" level="WARN" />
+        <logger name="javax.management" level="WARN" />
+        <logger name="org.springframework.jmx" level="WARN" />
+        <logger name="org.springframework.boot.actuate" level="WARN" />
     </springProfile>
     
     <!-- 生产环境配置 - 合并两个版本的最佳实践 -->
@@ -130,6 +144,12 @@
         <logger name="xiaozhi" level="INFO" />
         <logger name="org.springframework.web" level="ERROR" />
         <logger name="org.springboot.sample" level="ERROR" />
+        <!-- 抑制RMI和JMX相关的调试日志 -->
+        <logger name="sun.rmi" level="WARN" />
+        <logger name="com.sun.jmx" level="WARN" />
+        <logger name="javax.management" level="WARN" />
+        <logger name="org.springframework.jmx" level="WARN" />
+        <logger name="org.springframework.boot.actuate" level="WARN" />
     </springProfile>
     
     <!-- 确保日志目录存在 -->

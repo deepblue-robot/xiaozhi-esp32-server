@@ -6,7 +6,7 @@
     <packaging>jar</packaging>
     <version>0.0.1</version>
     <name>xiaozhi-esp32-api</name>
-    <description>小智后台管理系统</description>
+    <description>AI玩具后台管理系统</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -32,6 +32,12 @@
         <liquibase-core.version>4.20.0</liquibase-core.version>
         <aliyun-sms-version>4.1.0</aliyun-sms-version>
         <okio-version>3.4.0</okio-version>
+
+        <targetJavaProject>${basedir}/src/main/java</targetJavaProject>
+        <targetMapperPackage>com.xiaozhi.modules</targetMapperPackage>
+        <targetModelPackage>com.xiaozhi.modules</targetModelPackage>
+        <targetResourcesProject>${basedir}/src/main/resources</targetResourcesProject>
+        <targetXMLPackage>mapper</targetXMLPackage>
     </properties>
 
     <dependencies>
@@ -277,6 +283,29 @@
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.mybatis.generator</groupId>
+                <artifactId>mybatis-generator-maven-plugin</artifactId>
+                <version>1.4.2</version>
+                <configuration>
+                    <skip>false</skip>
+                    <configurationFile>src/main/resources/generatorConfig.xml</configurationFile>
+                    <verbose>true</verbose>
+                    <overwrite>true</overwrite>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.mysql</groupId>
+                        <artifactId>mysql-connector-j</artifactId>
+                        <version>8.0.33</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>tk.mybatis</groupId>
+                        <artifactId>mapper</artifactId>
+                        <version>4.3.0</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

@@ -1,0 +1,33 @@
+<!DOCTYPE generatorConfiguration PUBLIC
+        "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+  <properties resource="generator.properties"/>
+
+  <context defaultModelType="flat" id="MySQL" targetRuntime="MyBatis3Simple">
+
+    <plugin type="tk.mybatis.mapper.generator.MapperPlugin">
+      <property name="mappers" value="com.cavan.framework.web.mapper.SupportMapper"/>
+    </plugin>
+
+    <jdbcConnection connectionURL="${spring.datasource.url}"
+      driverClass="${spring.datasource.driver-class-name}"
+      password="${spring.datasource.password}"
+      userId="${spring.datasource.username}">
+    </jdbcConnection>
+
+    <javaModelGenerator targetPackage="${targetModelPackage}" targetProject="${targetJavaProject}"/>
+
+    <sqlMapGenerator targetPackage="${targetXMLPackage}" targetProject="${targetResourcesProject}"/>
+
+    <javaClientGenerator targetPackage="${targetMapperPackage}" targetProject="${targetJavaProject}"
+      type="XMLMAPPER"/>
+
+
+       <table domainObjectName="Merchant" tableName="ai_merchant">
+       <property name="useActualColumnNames" value="false"/>
+     </table>
+
+
+  </context>
+</generatorConfiguration>

@@ -12,7 +12,7 @@ spring:
     druid:
       #MySQL
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://10.16.32.3:3306/xiaozhi_esp32_server?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+      url: jdbc:mysql://10.16.32.3:3306/xiaozhi_esp32_server?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&useSSL=false
       username: root
       password: 123456
       initial-size: 10
@@ -49,3 +49,12 @@ spring:
           max-idle: 8        # 连接池中的最大空闲连接
           min-idle: 0        # 连接池中的最小空闲连接
         shutdown-timeout: 100ms  # 客户端优雅关闭的等待时间
+
+logging:
+  level:
+    # 禁用RMI和JMX相关的调试日志
+    sun.rmi: WARN
+    com.sun.jmx: WARN
+    javax.management: WARN
+    org.springframework.jmx: WARN
+    org.springframework.boot.actuate: WARN

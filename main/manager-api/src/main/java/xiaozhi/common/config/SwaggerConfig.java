@@ -1,11 +1,12 @@
 package xiaozhi.common.config;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
 
 /**
  * Swagger配置
@@ -80,11 +81,36 @@ public class SwaggerConfig {
     }
 
     @Bean
+    public GroupedOpenApi merchantApi() {
+        return GroupedOpenApi.builder()
+                .group("merchant")
+                .pathsToMatch("/merchant/**")
+                .build();
+    }
+
+
+    @Bean
     public OpenAPI customOpenAPI() {
-        return new OpenAPI().info(new Info()
-                .title("xiaozhi-esp32-manager-api")
-                .description("xiaozhi-esp32-manager-api文档")
-                .version("3.0")
-                .termsOfService("https://127.0.0.1"));
+        // 1. 定义全局Header的安全方案（核心：OpenAPI 3 规范要求）
+        String securitySchemeName = "tokenHeader";
+        return new OpenAPI()
+                // 文档基础信息
+                .info(new Info()
+                        .title("xiaozhi-esp32-manager-api")
+                        .version("3.0")
+                        .description("xiaozhi-esp32-manager-api文档"))
+                // 2. 配置全局Header参数（SecurityScheme 是 OpenAPI 3 标准写法）
+                .components(new io.swagger.v3.oas.models.Components()
+                        .addSecuritySchemes(securitySchemeName,
+                                new SecurityScheme()
+                                        .name("Authorization")  // Header名称
+                                        .type(SecurityScheme.Type.APIKEY)  // 类型为API KEY
+                                        .in(SecurityScheme.In.HEADER)  // 位置在Header
+                                        .description("访问令牌，格式：Bearer {token}")
+                        )
+                )
+                // 3. 绑定安全方案到所有接口（关键：不绑定则不显示）
+                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
+                .addSecurityItem(new SecurityRequirement().addList("appIdHeader"));
     }
 }

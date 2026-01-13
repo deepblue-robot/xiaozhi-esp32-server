@@ -26,6 +26,17 @@ spring:
       enabled: true
   main:
     allow-bean-definition-overriding: true
+management:
+  endpoints:
+    jmx:
+      exposure:
+        include: none  # 确保不暴露任何 JMX 端点
+  endpoint:
+    jmx:
+      enabled: false
+  health:
+    jmx:
+      enabled: false
 
 knife4j:
   enable: true
@@ -64,3 +75,11 @@ mybatis-plus:
     prefix:
     blobType: BLOB
     boolValue: TRUE
+
+logging:
+  level:
+    # 禁用RMI和JMX相关的调试日志
+    sun.rmi: WARN
+    com.sun.jmx: WARN
+    javax.management: WARN
+    org.springframework.jmx: WARN
