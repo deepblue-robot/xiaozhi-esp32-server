@@ -1,0 +1,109 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.deepblueai</groupId>
+        <artifactId>xiaozhi</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>manager-mini</artifactId>
+    <packaging>jar</packaging>
+
+    <name>xiaozhi-gateway</name>
+    <description>小程序后台</description>
+
+    <properties>
+
+        <!-- 编译时的编码 -->
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <maven.test.skip>true</maven.test.skip>
+
+        <dockerfile-maven-plugin.version>1.4.12</dockerfile-maven-plugin.version>
+        <docker.image.prefix>xiaozhi-cloud</docker.image.prefix>
+        <targetJavaProject>${basedir}/src/main/java</targetJavaProject>
+        <targetResourcesProject>${basedir}/src/main/resources</targetResourcesProject>
+        <start-class>com.deepblueai.xiaozhi.gateway.GatewayServerApplication</start-class>
+
+
+    </properties>
+
+    <dependencies>
+
+
+        <!-- Gateway 网关相关 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Registry 注册中心相关 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <!-- Config 配置中心相关 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <!-- 设置构建的 jar 包名 -->
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <!-- 打包 -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version> <!-- 如果 spring.boot.version 版本修改，则这里也要跟着修改 -->
+                <configuration>
+                    <finalName>${project.build.finalName}</finalName>
+                    <mainClass>${start-class}</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal> <!-- 将引入的 jar 打入其中 -->
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <!-- docker打包插件 -->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven-plugin.version}</version>
+                <!--    <executions>
+                        <execution>
+                            <id>default</id>
+                            <goals>
+                                <goal>build</goal>
+                            </goals>
+                        </execution>
+                    </executions>-->
+                <configuration>
+                    <repository>${project.artifactId}</repository>
+                    <buildArgs>
+                        <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+                    </buildArgs>
+                </configuration>
+            </plugin>
+
+
+
+        </plugins>
+    </build>
+</project>
