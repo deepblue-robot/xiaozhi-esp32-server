@@ -66,6 +66,7 @@ public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> 
     private final OtaService otaService;
 
     @Async
+    @Override
     public void updateDeviceConnectionInfo(String agentId, String deviceId, String appVersion) {
         try {
             DeviceEntity device = new DeviceEntity();

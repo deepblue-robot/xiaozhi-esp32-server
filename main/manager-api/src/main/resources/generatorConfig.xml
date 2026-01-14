@@ -24,7 +24,7 @@
       type="XMLMAPPER"/>
 
 
-       <table domainObjectName="Merchant" tableName="ai_merchant">
+       <table domainObjectName="MerchantAgent" tableName="ai_merchant_agent">
        <property name="useActualColumnNames" value="false"/>
      </table>
 
